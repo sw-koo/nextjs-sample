@@ -1,8 +1,5 @@
 import { headers } from 'next/headers';
 
-/** Intentional TypeScript error for CI/build failure testing — remove after verification. */
-const __BUILD_FAILURE_TEST: string = 1;
-
 interface HelloResponse {
   message: string;
   hostname: string;
