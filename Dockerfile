@@ -14,6 +14,7 @@ FROM node:24-alpine AS runner
 WORKDIR /app
 # node:*-alpine ships a 'node' user at uid 1000 — reuse it instead of
 # creating a duplicate (adduser would fail with uid conflict).
+RUN apk upgrade --no-cache && npm install -g npm@11.19.1
 RUN apk add --no-cache tini
 ENV NODE_ENV=production PORT=3000
 COPY --from=builder --chown=node:node /app/.next ./.next
