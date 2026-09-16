@@ -10,7 +10,7 @@ interface HelloResponse {
 async function fetchHello(): Promise<HelloResponse | null> {
   // Same-origin fetch — works because Next.js renders on the same Pod.
   // We use the request host so it works behind any ingress hostname.
-  const h = headers();
+  const h = await headers();
   const host = h.get('x-forwarded-host') ?? h.get('host');
   const proto = h.get('x-forwarded-proto') ?? 'http';
   if (!host) return null;
