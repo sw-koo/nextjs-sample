@@ -8,19 +8,24 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN mkdir -p public && npm run build
+RUN mkdir -p public prisma \
+  && if [ -f prisma/schema.prisma ]; then npx --no-install prisma generate; fi \
+  && npm run build
 
 FROM node:24-alpine AS runner
 WORKDIR /app
 # node:*-alpine ships a 'node' user at uid 1000 — reuse it instead of
 # creating a duplicate (adduser would fail with uid conflict).
+# openssl is for Prisma's sqlite engine (libssl); harmless on stateless
+# apps.
 RUN apk upgrade --no-cache && npm install -g npm@11.19.1
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini openssl
 ENV NODE_ENV=production PORT=3000
 COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/package*.json ./
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/prisma ./prisma
 USER node
 EXPOSE 3000
 ENTRYPOINT ["/sbin/tini", "--"]
